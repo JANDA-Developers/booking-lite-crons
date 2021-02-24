@@ -32,6 +32,7 @@ override.tf.json
 # Ignore CLI configuration files
 .terraformrc
 terraform.rc
-state.config
+backend.config
 node_modules
 yarn-error.log
+dist

@@ -1,9 +1,15 @@
 {
   "name": "bklite-cron",
   "private": true,
-  "workspaces": [
-    "modules/*"
-  ],
+  "workspaces": {
+    "packages": [
+      "packages/*",
+      "services/*"
+    ]
+  },
+  "scripts": {
+    "build": "lerna run build"
+  },
   "devDependencies": {
     "lerna": "^3.22.1"
   }
