@@ -9,9 +9,9 @@
   },
   "scripts": {
     "build": "lerna run build",
-    "preinstall:layer": "rm -rf ./nodejs/node_modules && lerna run build",
-    "install:layer": "yarn install --production --modules-folder ./nodejs/node_modules",
-    "postinstall:layer": "cp ./packages/**/dist/*.* ./nodejs/"
+    "prelayer": "rm -rf ./nodejs layer.zip && lerna run build",
+    "layer": "yarn install --production --modules-folder ./nodejs/node_modules",
+    "postlayer": "7z a layer.zip ./nodejs"
   },
   "devDependencies": {
     "lerna": "^3.22.1"

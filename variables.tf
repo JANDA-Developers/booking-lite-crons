@@ -17,3 +17,12 @@ variable "vpc_id" {
 variable "subnet_ids" {
   type = list(string)
 }
+variable "layer_file_name" {
+  type        = string
+  description = "File name for AWS Lambda nodejs layer"
+}
+
+variable "layer_s3_bucket_name" {
+  type        = string
+  description = "lambda layer store"
+}

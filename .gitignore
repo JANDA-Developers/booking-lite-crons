@@ -36,3 +36,5 @@ backend.config
 node_modules
 yarn-error.log
 dist
+/nodejs
+layer.zip

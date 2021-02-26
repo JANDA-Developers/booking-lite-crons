@@ -14,9 +14,11 @@ terraform {
 }
 
 module "common_layer" {
-  source = "./packages/@janda-bklite-models/infra"
+  source = "./packages/bklite_commons/infra"
 
-  environment = var.environment
+  environment     = var.environment
+  layer_file_name = var.layer_file_name
+  layer_s3_bucket_name = var.layer_s3_bucket_name
 }
 
 module "product_automator" {
