@@ -7,7 +7,7 @@ terraform {
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = ">=3.28.0"
+      version = ">=3.30.0"
     }
   }
   backend "s3" {}
@@ -18,7 +18,6 @@ module "common_layer" {
 
   environment     = var.environment
   layer_file_name = var.layer_file_name
-  layer_s3_bucket_name = var.layer_s3_bucket_name
 }
 
 module "product_automator" {
@@ -29,4 +28,5 @@ module "product_automator" {
   vpc_id                = var.vpc_id
   subnet_ids            = var.subnet_ids
   lambda_layer_arn_list = [module.common_layer.lambda_layer_arn]
+  account_id = var.account_id
 }

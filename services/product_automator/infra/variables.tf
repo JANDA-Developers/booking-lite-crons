@@ -14,3 +14,7 @@ variable "handler_name" {
 variable "lambda_layer_arn_list" {
   type = list(string)
 }
+
+variable "account_id" {
+  type = string
+}
