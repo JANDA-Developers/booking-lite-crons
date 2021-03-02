@@ -18,7 +18,7 @@ export const chargeServiceUsage: ChargeUsageFunctionType = async (
   action,
   session,
   usageType
-) => {
+): Promise<typeof resource> => {
   const usage = Object.assign(new ServiceUsage(), {
     _resourceId: resource._id,
     _customerId: resource.serviceCustomerId,

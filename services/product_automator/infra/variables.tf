@@ -15,6 +15,17 @@ variable "lambda_layer_arn_list" {
   type = list(string)
 }
 
-variable "account_id" {
-  type = string
+variable "lambda_variables" {
+  type        = map(string)
+  description = "Variables for aws lambda"
+  default = {
+    memory  = 512
+    timeout = 840
+  }
+}
+
+variable "env_db_uri" {
+  type        = string
+  description = "Env values for lambda"
+
 }

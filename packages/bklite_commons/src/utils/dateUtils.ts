@@ -25,13 +25,6 @@ export const ONE_HOUR: Hour = ONE_MINUTE * 60;
 export const ONE_DAY = ONE_HOUR * 24;
 export const ONE_YEAR = ONE_DAY * 365;
 
-export enum TimeUnit {
-  ONE_YEAR = 1000 * 60 * 60 * 24 * 365,
-  ONE_DAY = 1000 * 60 * 60 * 24,
-  ONE_HOUR = 1000 * 60 * 60,
-  ONE_MINUTE = 1000 * 60,
-}
-
 export enum DayOfWeek {
   SUN = 0b0000001,
   MON = 0b0000010,
@@ -42,10 +35,29 @@ export enum DayOfWeek {
   SAT = 0b1000000,
 }
 
-export const SmsCollectionNamePrefix = "SMS";
+export type DayOfWeeks = number;
 
-export const mongoCollectionName = (collectionName: string): string =>
-  collectionName;
+export const dayOfWeeksToDayOfWeekList = (
+  dayOfWeeks: DayOfWeeks
+): DayOfWeek[] => {
+  const from = DayOfWeek.SUN;
+  const to = DayOfWeek.SAT;
+  const result: DayOfWeek[] = [];
+  for (let cur = from; cur <= to; cur <<= 1) {
+    if (cur && dayOfWeeks !== 0) {
+      result.push(cur);
+    }
+  }
+  return result;
+};
+
+export const dayOfWeekListToDayOfWeeks = (
+  dayOfWeekList: DayOfWeek[]
+): DayOfWeeks => {
+  return dayOfWeekList.reduce((d1, d2) => d1 | d2);
+};
+
+export const SmsCollectionNamePrefix = "SMS";
 
 export const PAYMENT_EXP_TIME_CARD = 20 * ONE_MINUTE;
 export const PAYMENT_EXP_TIME_BANK_TRANSFER = ONE_DAY;

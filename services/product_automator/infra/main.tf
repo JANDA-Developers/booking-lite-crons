@@ -14,11 +14,18 @@ resource "aws_lambda_function" "lambda" {
   role          = aws_iam_role.iam_for_lambda.arn
   runtime       = "nodejs14.x"
   filename      = "${path.module}/dist.zip"
-  timeout       = 30
+  timeout       = var.lambda_variables.timeout
+  memory_size   = var.lambda_variables.memory
 
   layers = var.lambda_layer_arn_list
 
   source_code_hash = filebase64sha256("${path.module}/dist.zip")
+
+  environment {
+    variables = {
+      DB_URI = var.env_db_uri
+    }
+  }
 }
 
 resource "aws_cloudwatch_event_rule" "everyday_0am_kr" {

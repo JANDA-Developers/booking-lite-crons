@@ -23,6 +23,7 @@ variable "layer_file_name" {
   description = "File name for AWS Lambda nodejs layer"
 }
 
-variable "account_id" {
-  type = string
+variable "env_db_uri" {
+  type        = string
+  description = "Lambda DB URI"
 }

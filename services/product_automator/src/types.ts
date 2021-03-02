@@ -2,8 +2,8 @@ export interface EventType {
   greeting: string;
 }
 
-export interface ResponseType {
+export interface ResponseType<T> {
   ok: boolean;
-  errors: any;
-  data: string;
+  error: any;
+  data?: T;
 }

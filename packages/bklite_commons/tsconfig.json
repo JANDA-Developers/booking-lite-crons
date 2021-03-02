@@ -6,7 +6,7 @@
     "target": "ES2019",
     "lib": ["ES2018", "es2020", "ESNext.AsyncIterable"],
     "moduleResolution": "node",
-    "outDir": "dist/@janda-bklite",
+    "outDir": "dist",
     "rootDir": "src",
     "declaration": true,
     "paths": {

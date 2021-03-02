@@ -13,6 +13,7 @@ terraform {
   backend "s3" {}
 }
 
+# Package! Booking Lite Backend 모델 & Util 함수 담겨있음. node_modules 정도로 생각하면됨!
 module "common_layer" {
   source = "./packages/bklite_commons/infra"
 
@@ -28,5 +29,5 @@ module "product_automator" {
   vpc_id                = var.vpc_id
   subnet_ids            = var.subnet_ids
   lambda_layer_arn_list = [module.common_layer.lambda_layer_arn]
-  account_id = var.account_id
+  env_db_uri            = var.env_db_uri
 }

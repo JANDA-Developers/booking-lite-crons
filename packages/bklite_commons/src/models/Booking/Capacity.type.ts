@@ -1,33 +1,26 @@
 import { Prop } from "@typegoose/typegoose";
 import { IsDefined, Min } from "class-validator";
 
-export interface Capacity {
-  key: string;
-  count: number;
-  label: string;
-  price: number;
-}
-
 export class Capacity {
-  @Prop({ required: true })
+  @Prop()
   key!: string;
 
-  @Prop({ required: true })
+  @Prop()
   count!: number;
 
-  @Prop({ required: true })
+  @Prop()
   label!: string;
 
-  @Prop({ required: true })
+  @Prop()
   price!: number;
 }
 
-export class Usage extends Capacity {
+export class Usage {
   @Prop()
   @IsDefined()
   key!: string;
 
-  @Prop({ required: 600_000 > 300 })
+  @Prop()
   @IsDefined()
   label!: string;
 
@@ -40,7 +33,7 @@ export class Usage extends Capacity {
   price!: number;
 }
 
-export class CapacitySummary extends Capacity {
+export class CapacitySummary {
   @Prop()
   key!: string;
 
@@ -57,7 +50,6 @@ export class CapacitySummary extends Capacity {
     // (this.usage / this.capacityCount).toFixed(3)
     return 0;
   }
-
   @Prop()
   price!: number;
 }
@@ -73,4 +65,3 @@ export const capacityToUsageDetails = (capacity: Capacity): CapacitySummary => {
   } as CapacitySummary);
   return result;
 };
-8;

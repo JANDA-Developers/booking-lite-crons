@@ -8,20 +8,22 @@
     "dev": "ts-node-dev --respawn --no-notify --rs src/index.ts --env=dev"
   },
   "description": "Interface & Classes",
-  "main": "dist/@janda-bklite/index.js",
+  "main": "dist/index.js",
   "author": "BaeKY",
   "private": true,
-  "types": "dist/@janda-bklite/index.d.ts",
+  "types": "dist/index.d.ts",
   "dependencies": {
     "@typegoose/typegoose": "^7.4.8",
     "axios": "^0.21.1",
     "class-validator": "^0.13.1",
     "crypto-random-string": "^3.3.1",
+    "lodash": "^4.17.21",
     "mongoose": "5.10.18",
     "mongoose-long": "^0.3.2",
     "reflect-metadata": "^0.1.13"
   },
   "devDependencies": {
+    "@types/lodash": "^4.14.168",
     "@types/mongoose": "^5.10.3",
     "@typescript-eslint/eslint-plugin": "^4.15.2",
     "@typescript-eslint/parser": "^4.15.2",

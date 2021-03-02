@@ -6,7 +6,7 @@ import { Tag } from "./Tag.type";
  * 예약시 받을 추가 필드?
  */
 export class Attribute {
-  @Prop({ type: () => [Tag] })
+  @Prop({ type: () => [Tag], _id: false })
   tags?: Tag[];
 
   @Prop()
@@ -24,10 +24,10 @@ export class Attribute {
   @Prop()
   options?: string[];
 
-  @Prop()
+  @Prop({ required: true })
   label!: string;
 
-  @Prop()
+  @Prop({ required: true })
   key!: string;
 
   @Prop({ enum: DisplayType })
@@ -38,9 +38,9 @@ export class Attribute {
  * 예약할때 받는 파라미터?
  */
 export class AttributeParam {
-  @Prop()
+  @Prop({ required: true })
   key!: string;
 
-  @Prop()
+  @Prop({ required: true })
   value!: string;
 }

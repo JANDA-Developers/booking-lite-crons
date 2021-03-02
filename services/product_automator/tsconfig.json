@@ -5,27 +5,9 @@
     "module": "commonjs",
     "target": "ES2019",
     "lib": ["ES2018", "es2020", "ESNext.AsyncIterable"],
-    "sourceMap": false,
-    "allowJs": true,
     "moduleResolution": "node",
     "outDir": "dist",
-    "rootDir": "src",
-    "forceConsistentCasingInFileNames": true,
-    "noImplicitReturns": true,
-    "noImplicitThis": true,
-    "noImplicitAny": false,
-    "strict": false,
-    "strictNullChecks": true,
-    "suppressImplicitAnyIndexErrors": true,
-    "noUnusedLocals": true,
-    "esModuleInterop": true,
-    "skipLibCheck": true,
-    "experimentalDecorators": true,
-    "emitDecoratorMetadata": true,
-    "paths": {
-      "opt/nodejs*": ["src/*"]
-    }
+    "rootDir": "src"
   },
-  "include": ["src/**/*"],
-  "exclude": ["node_modules", "jest"]
+  "exclude": ["**/tests/*"]
 }
