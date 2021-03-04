@@ -156,11 +156,20 @@ export class ProductAutomatorBooking extends AbsProductAutomator<ProductBooking>
         ).getTime(),
       },
       "automatorInfo.automatorId": this._id,
+      "usageDetails.usage": {
+        $not: {
+          $gt: 0,
+        },
+      },
     };
     const productList = await ProductBookingModel.find(query).session(
       session || null
     );
-    console.log({ query });
+
+    const destroyResult = await ProductBookingModel.deleteMany(query, {
+      session,
+    });
+    console.log(destroyResult);
     return productList;
   }
 }
