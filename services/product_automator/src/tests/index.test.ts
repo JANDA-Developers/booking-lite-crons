@@ -55,7 +55,7 @@ describe("Test", () => {
           return automator.destroy(session, basedDate);
         })
       );
-      console.table(r);
+      console.info(r);
     });
     expect({ productAutomatorList }).toMatchObject({
       productAutomatorList: expect.any(Array),

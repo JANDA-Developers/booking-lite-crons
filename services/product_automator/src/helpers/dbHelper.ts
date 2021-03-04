@@ -10,7 +10,7 @@ export const connectWithDB = async (uri: string) =>
       useFindAndModify: false,
     })
     .then(async () => {
-      console.log(`DB Connected: ${uri}`);
+      console.log(`DB Connected!`);
     })
     .catch((err) => {
       console.log(err);
