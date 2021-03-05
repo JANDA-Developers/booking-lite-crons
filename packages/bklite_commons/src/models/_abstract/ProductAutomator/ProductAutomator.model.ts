@@ -28,6 +28,8 @@ import {
   TimezoneMap,
 } from "../../commonTypes/Timezone.type";
 import { ClientSession } from "mongoose";
+import { TimeMillies } from "../../../utils/dateUtils";
+import { MongoLong } from "../../../types";
 export abstract class ProductTemplate<T = any>
   implements IAutomatorPayloadTemplate<Product, T> {
   abstract generate(input?: T): Product;
@@ -51,12 +53,23 @@ export abstract class ProductTemplate<T = any>
 export abstract class AbsProductAutomator<T extends Product>
   extends Node
   implements IAutomator<T> {
-  abstract generate(sessin?: ClientSession): Promise<IAutomatable[]>;
+  abstract planGenerate(time?: TimeMillies): Promise<IAutomatable[]>;
+  abstract planDestroy(time?: TimeMillies): Promise<IAutomatable[]>;
+  abstract generate(
+    basedTime: TimeMillies,
+    sessin?: ClientSession
+  ): Promise<IAutomatable[]>;
   abstract destroy(
-    session?: ClientSession,
-    date?: Date
+    basedTime: TimeMillies,
+    session?: ClientSession
   ): Promise<IAutomatable[]>;
   abstract templates: IAutomatorPayloadTemplate<T>[];
+
+  @Prop({ type: MongoLong })
+  latestGenerate?: TimeMillies;
+
+  @Prop({ type: MongoLong })
+  latestDestroy?: TimeMillies;
 
   get usageType(): ServiceUsageType {
     return ServiceUsageType.PRODUCT_AUTOMATOR;
@@ -117,6 +130,12 @@ export abstract class AbsProductAutomator<T extends Product>
 })
 export class ProductAutomator extends AbsProductAutomator<Product> {
   templates!: ProductTemplate[];
+  async planGenerate(): Promise<IAutomatable[]> {
+    throw new Error("Method not implemented.");
+  }
+  async planDestroy(): Promise<IAutomatable[]> {
+    throw new Error("Method not implemented.");
+  }
   async generate(): Promise<IAutomatable[]> {
     throw new Error(
       "This class is BaseProductAutomator for just DB Model. Please inherit this and use it"

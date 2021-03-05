@@ -23,6 +23,7 @@ afterAll(async () => {
 });
 
 describe("Test", () => {
+  const time = Date.now();
   test("GenerateProduct", async () => {
     const data: DocumentType<ProductBooking>[] = [];
     const result = await executeWithDbSession(async (session) => {
@@ -32,7 +33,7 @@ describe("Test", () => {
       (
         await Promise.all(
           productAutomatorList.map(
-            async (automator) => await automator.generate(session)
+            async (automator) => await automator.generate(time, session)
           )
         )
       ).forEach((productList) => data.push(...productList));
@@ -48,11 +49,10 @@ describe("Test", () => {
   test("DestroyProduct", async () => {
     // TODO: Destroy Test ㄱㄱ
     const productAutomatorList = await ProductAutomatorBookingModel.find();
-    const basedDate = new Date();
     await executeWithDbSession(async (session) => {
       const r = await Promise.all(
         productAutomatorList.map(async (automator) => {
-          return automator.destroy(session, basedDate);
+          return automator.destroy(time, session);
         })
       );
       console.info(r);

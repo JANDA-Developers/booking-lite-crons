@@ -8,7 +8,7 @@ import { ArrayMinSize } from "class-validator";
 import { pullAllWith } from "lodash";
 import { ObjectId } from "mongodb";
 import { ClientSession } from "mongoose";
-import { DayOfWeek, ONE_HOUR } from "../../utils/dateUtils";
+import { DayOfWeek, ONE_HOUR, TimeMillies } from "../../utils/dateUtils";
 import { TimeRange } from "../commonTypes/DateRange.type";
 import { Tag } from "../commonTypes/Tag.type";
 import {
@@ -96,10 +96,10 @@ export class ProductAutomatorBooking extends AbsProductAutomator<ProductBooking>
   @Prop({ enum: DayOfWeek, default: [], type: mongoose.SchemaTypes.Number })
   exceptedDayOfWeeks: DayOfWeek[] = [];
 
-  async generate(
-    session?: ClientSession
-  ): Promise<DocumentType<ProductBooking>[]> {
-    const basedDate = new Date(Date.now() + ONE_HOUR * this.timezone.offset);
+  async planGenerate(
+    time: TimeMillies = Date.now()
+  ): Promise<ProductBooking[]> {
+    const basedDate = new Date(time + ONE_HOUR * this.timezone.offset);
     const productBookings: ProductBooking[] = [];
 
     for (let index = 0; index < this.countDate; index++) {
@@ -136,24 +136,15 @@ export class ProductAutomatorBooking extends AbsProductAutomator<ProductBooking>
         );
       }
     );
-
-    const results = await ProductBookingModel.insertMany(products, {
-      session,
-      ordered: false,
-    });
-
-    return results;
+    return products;
   }
-  async destroy(
-    session?: ClientSession,
-    basedDate: Date = new Date()
+
+  async planDestroy(
+    time: TimeMillies = Date.now()
   ): Promise<DocumentType<ProductBooking>[]> {
-    // TODO: this.template.destroy?
     const query = {
       "dateRangeForUse.from": {
-        $gte: new Date(
-          basedDate.getTime() - ONE_HOUR * this.timezone.offset
-        ).getTime(),
+        $gte: new Date(time - ONE_HOUR * this.timezone.offset).getTime(),
       },
       "automatorInfo.automatorId": this._id,
       "usageDetails.usage": {
@@ -162,15 +153,39 @@ export class ProductAutomatorBooking extends AbsProductAutomator<ProductBooking>
         },
       },
     };
-    const productList = await ProductBookingModel.find(query).session(
-      session || null
-    );
+    return ProductBookingModel.find(query);
+  }
 
-    const destroyResult = await ProductBookingModel.deleteMany(query, {
+  async generate(
+    time: TimeMillies = Date.now(),
+    session?: ClientSession
+  ): Promise<DocumentType<ProductBooking>[]> {
+    const productBookings: ProductBooking[] = await this.planGenerate(time);
+    const results = await ProductBookingModel.insertMany(productBookings, {
       session,
+      ordered: false,
     });
-    console.log(destroyResult);
-    return productList;
+    this.latestGenerate = time;
+    return results;
+  }
+  async destroy(
+    time: TimeMillies = Date.now(),
+    session?: ClientSession
+  ): Promise<DocumentType<ProductBooking>[]> {
+    const deleteTargets = await this.planDestroy(time);
+    const result = await ProductBookingModel.deleteMany(
+      {
+        _id: {
+          $in: deleteTargets.map((t) => t._id),
+        },
+      },
+      {
+        session,
+      }
+    );
+    this.latestDestroy = time;
+    console.log(result);
+    return deleteTargets;
   }
 }
 

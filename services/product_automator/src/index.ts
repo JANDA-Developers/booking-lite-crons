@@ -15,16 +15,16 @@ import {
 export const handler = async (): Promise<
   ResponseType<Array<DocumentType<ProductBooking>>>
 > => {
-  const DB_URI = process.env.DB_URI || "";
-  await connectWithDB(DB_URI);
+  await connectWithDB(process.env.DB_URI || "");
 
   const data: DocumentType<ProductBooking>[] = [];
+  const time = Date.now();
   const execResult = await executeWithDbSession(async (session) => {
     const productAutomatorList = await findAutomators();
     (
       await Promise.all(
         productAutomatorList.map(
-          async (automator) => await automator.generate(session)
+          async (automator) => await automator.generate(time, session)
         )
       )
     ).forEach((productList) => data.push(...productList));

@@ -1,5 +1,6 @@
 import { ObjectId } from "mongodb";
 import { ClientSession } from "mongoose";
+import { TimeMillies } from "../../../utils/dateUtils";
 import { Node } from "../../commonTypes/Node";
 import { ServiceChargeTarget } from "../../Service/ServiceTarget.model";
 
@@ -23,6 +24,16 @@ export interface IAutomator<T extends IAutomatable>
   extends Node,
     ServiceChargeTarget {
   templates: IAutomatorPayloadTemplate<T>[];
-  generate(session?: ClientSession): Promise<IAutomatable[]>;
-  destroy(session?: ClientSession): Promise<IAutomatable[]>;
+  latestGenerate?: TimeMillies;
+  latestDestroy?: TimeMillies;
+  generate(
+    timeMillies?: TimeMillies,
+    session?: ClientSession
+  ): Promise<IAutomatable[]>;
+  destroy(
+    timeMillies?: TimeMillies,
+    session?: ClientSession
+  ): Promise<IAutomatable[]>;
+  planGenerate(timeMillies?: TimeMillies): Promise<IAutomatable[]>;
+  planDestroy(timeMillies?: TimeMillies): Promise<IAutomatable[]>;
 }
