@@ -1,22 +1,23 @@
-import { Prop } from "@typegoose/typegoose";
-import { Base } from "@typegoose/typegoose/lib/defaultClasses";
+import { Prop } from '@typegoose/typegoose'
+import { Base } from '@typegoose/typegoose/lib/defaultClasses'
 
 export class Node extends Base {
-  constructor(args?: any) {
-    super();
-    if (args) {
+  constructor (args?: any) {
+    super()
+    if (args != null) {
       for (const key in args) {
-        const element = args[key];
-        this[key] = element;
+        const element = args[key]
+        this[key] = element
       }
     }
   }
-  @Prop()
-  readonly createdAt!: Date;
 
   @Prop()
-  updatedAt!: Date;
+  readonly createdAt!: Date
 
   @Prop()
-  isDeleted?: boolean;
+  updatedAt!: Date
+
+  @Prop()
+  isDeleted?: boolean
 }

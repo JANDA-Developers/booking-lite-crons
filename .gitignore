@@ -33,6 +33,7 @@ override.tf.json
 .terraformrc
 terraform.rc
 backend.config
+backend.*.config
 node_modules
 yarn-error.log
 dist

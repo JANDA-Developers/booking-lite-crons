@@ -1,37 +1,37 @@
-import { Prop } from "@typegoose/typegoose";
-import { DisplayType } from "../../enums";
-import { Tag } from "./Tag.type";
+import { Prop } from '@typegoose/typegoose'
+import { DisplayType } from '../../enums'
+import { Tag } from './Tag.type'
 
 /**
  * 예약시 받을 추가 필드?
  */
 export class Attribute {
   @Prop({ type: () => [Tag], _id: false })
-  tags?: Tag[];
+  tags?: Tag[]
 
   @Prop()
-  value?: string;
+  value?: string
 
   @Prop()
-  placeHolder?: string;
+  placeHolder?: string
 
   @Prop()
-  default?: string;
+  default?: string
 
   @Prop()
-  require?: boolean;
+  require?: boolean
 
   @Prop()
-  options?: string[];
+  options?: string[]
 
   @Prop({ required: true })
-  label!: string;
+  label!: string
 
   @Prop({ required: true })
-  key!: string;
+  key!: string
 
   @Prop({ enum: DisplayType })
-  displayType!: DisplayType;
+  displayType!: DisplayType
 }
 
 /**
@@ -39,8 +39,8 @@ export class Attribute {
  */
 export class AttributeParam {
   @Prop({ required: true })
-  key!: string;
+  key!: string
 
   @Prop({ required: true })
-  value!: string;
+  value!: string
 }

@@ -1,14 +1,14 @@
-import { Prop } from "@typegoose/typegoose";
+import { Prop } from '@typegoose/typegoose'
 
 export class Tag {
-  constructor(key: string, value: string) {
-    this.key = key;
-    this.value = value;
+  constructor (key: string, value: string) {
+    this.key = key
+    this.value = value
   }
 
   @Prop()
-  key: string;
+  key: string
 
   @Prop()
-  value: string;
+  value: string
 }
