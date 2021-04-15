@@ -2,62 +2,61 @@ import {
   DocumentType,
   getDiscriminatorModelForClass,
   mongoose,
-  Prop,
-} from "@typegoose/typegoose";
-import { ArrayMinSize } from "class-validator";
-import { pullAllWith } from "lodash";
-import { ObjectId } from "mongodb";
-import { ClientSession } from "mongoose";
-import { DayOfWeek, ONE_HOUR, TimeMillies } from "../../utils/dateUtils";
-import { TimeRange } from "../commonTypes/DateRange.type";
-import { Tag } from "../commonTypes/Tag.type";
+  Prop
+} from '@typegoose/typegoose'
+import { ArrayMinSize } from 'class-validator'
+import { pullAllWith } from 'lodash'
+import { ObjectId, ClientSession } from 'mongodb'
+import { DayOfWeek, ONE_HOUR, TimeMillies } from '../../utils/dateUtils'
+import { TimeRange } from '../commonTypes/DateRange.type'
+import { Tag } from '../commonTypes/Tag.type'
 import {
   AbsProductAutomator,
   ProductAutomatorModel,
-  ProductTemplate,
-} from "../_abstract/ProductAutomator/ProductAutomator.model";
-import { Capacity } from "./Capacity.type";
+  ProductTemplate
+} from '../_abstract/ProductAutomator/ProductAutomator.model'
+import { Capacity, capacityToUsageDetails } from './Capacity.type'
 import {
   ProductBooking,
   ProductBookingAutomatorInfo,
-  ProductBookingModel,
-} from "./Product.model";
+  ProductBookingModel
+} from './Product.model'
 
 export interface ITemplateGenerateParams {
-  automatorId: ObjectId;
-  basedDate: Date;
-  index: number;
-  targetItemId: ObjectId;
-  ownerId: ObjectId;
-  tags?: Tag[];
+  automatorId: ObjectId
+  basedDate: Date
+  index: number
+  targetItemId: ObjectId
+  ownerId: ObjectId
+  tags?: Tag[]
 }
 
 export class ProductBookingTemplate extends ProductTemplate<ITemplateGenerateParams> {
   @Prop({ type: () => TimeRange, required: true, _id: false })
-  timeRangeForUse!: TimeRange;
+  timeRangeForUse!: TimeRange
 
   @Prop({ type: () => TimeRange, _id: false })
-  timeRangeForSale?: TimeRange;
+  timeRangeForSale?: TimeRange
 
   @Prop({ type: () => [Capacity], _id: false })
-  capacityDetails: Capacity[] = [];
+  capacityDetails: Capacity[] = []
 
-  generate(input: ITemplateGenerateParams): ProductBooking {
+  generate (input: ITemplateGenerateParams): ProductBooking {
     const {
       automatorId,
       basedDate,
       index,
       ownerId,
       targetItemId,
-      tags,
-    } = input;
+      tags
+    } = input
     const automatorInfo = new ProductBookingAutomatorInfo({
       automatorId,
       basedDate,
       index,
       timeRangeForUse: this.timeRangeForUse,
-      timeRangeForSale: this.timeRangeForSale,
-    });
+      timeRangeForSale: this.timeRangeForSale
+    })
     const temp = Object.assign(new ProductBooking(), {
       _id: new ObjectId(),
       code: ProductBooking.generateCode(),
@@ -76,120 +75,135 @@ export class ProductBookingTemplate extends ProductTemplate<ITemplateGeneratePar
       _itemId: targetItemId,
       automatorInfo,
       _ownerId: ownerId,
-      tags: tags || [],
-    } as ProductBooking);
-    return temp;
+      tags: tags ?? []
+    })
+    return temp
   }
 }
 
 export class ProductAutomatorBooking extends AbsProductAutomator<ProductBooking> {
   @ArrayMinSize(1)
   @Prop({ type: () => [ProductBookingTemplate], default: [] })
-  templates!: ProductBookingTemplate[];
+  templates!: ProductBookingTemplate[]
 
   @Prop()
-  countDate!: number;
+  countDate!: number
 
   @Prop({ type: () => [Tag], default: [] })
-  tags: Tag[] = [];
+  tags: Tag[] = []
 
   @Prop({ enum: DayOfWeek, default: [], type: mongoose.SchemaTypes.Number })
-  exceptedDayOfWeeks: DayOfWeek[] = [];
+  exceptedDayOfWeeks: DayOfWeek[] = []
 
-  async planGenerate(
+  /**
+   * generate시에 생성될 Product 객체들을 반환한다.
+   * @param time
+   * @returns
+   */
+  async planGenerate (
     time: TimeMillies = Date.now()
   ): Promise<ProductBooking[]> {
-    const basedDate = new Date(time + ONE_HOUR * this.timezone.offset);
-    const productBookings: ProductBooking[] = [];
+    const basedDate = new Date(time + ONE_HOUR * this.timezone.offset)
+    const productBookings: ProductBooking[] = []
 
     for (let index = 0; index < this.countDate; index++) {
       productBookings.push(
-        ...this.templates.map((tpl) =>
-          tpl.generate({
+        ...this.templates.map((tpl) => {
+          const temp = tpl.generate({
             automatorId: this._id,
             basedDate,
             index,
             ownerId: this.ownerId,
             targetItemId: this.targetItemId,
-            tags: this.tags,
+            tags: this.tags
           })
-        )
-      );
+          temp.usageDetails = temp.capacityDetails.map(capacityToUsageDetails)
+          return temp
+        })
+      )
     }
 
+    // 이미 생성되어있는 Product와 비교하여 중복 제거
     const products = pullAllWith(
       productBookings,
       await ProductBookingModel.find(
         {
-          "automatorInfo.hashCode": {
-            $in: productBookings.map((p) => p.automatorInfo?.hashCode || ""),
-          },
+          'automatorInfo.hashCode': {
+            $in: productBookings.map((p) => p.automatorInfo?.hashCode ?? '')
+          }
         },
         {
-          "automatorInfo.hashCode": true,
+          'automatorInfo.hashCode': true
         }
       ),
       (prodOrigin, prodExisting) => {
         return (
           prodOrigin.automatorInfo?.hashCode ===
           prodExisting.automatorInfo?.hashCode
-        );
+        )
       }
-    );
-    return products;
+    )
+    return products
   }
 
-  async planDestroy(
+  async planDestroy (
     time: TimeMillies = Date.now()
-  ): Promise<DocumentType<ProductBooking>[]> {
+  ): Promise<Array<DocumentType<ProductBooking>>> {
     const query = {
-      "dateRangeForUse.from": {
-        $gte: new Date(time - ONE_HOUR * this.timezone.offset).getTime(),
+      'dateRangeForUse.from': {
+        $gte: new Date(time - ONE_HOUR * this.timezone.offset).getTime()
       },
-      "automatorInfo.automatorId": this._id,
-      "usageDetails.usage": {
+      'automatorInfo.automatorId': this._id,
+      'usageDetails.usage': {
         $not: {
-          $gt: 0,
-        },
-      },
-    };
-    return ProductBookingModel.find(query);
+          $gt: 0
+        }
+      }
+    }
+    return await ProductBookingModel.find(query)
   }
 
-  async generate(
+  /**
+   * DB에 업데이트함!
+   * @param time
+   * @param session
+   * @returns
+   */
+  async generate (
     time: TimeMillies = Date.now(),
     session?: ClientSession
-  ): Promise<DocumentType<ProductBooking>[]> {
-    const productBookings: ProductBooking[] = await this.planGenerate(time);
+  ): Promise<Array<DocumentType<ProductBooking>>> {
+    const productBookings: ProductBooking[] = await this.planGenerate(time)
     const results = await ProductBookingModel.insertMany(productBookings, {
       session,
-      ordered: false,
-    });
-    this.latestGenerate = time;
-    return results;
+      ordered: false
+    })
+    this.latestGenerate = time
+    return results
   }
-  async destroy(
+
+  async destroy (
     time: TimeMillies = Date.now(),
     session?: ClientSession
-  ): Promise<DocumentType<ProductBooking>[]> {
-    const deleteTargets = await this.planDestroy(time);
+  ): Promise<Array<DocumentType<ProductBooking>>> {
+    const deleteTargets = await this.planDestroy(time)
     const result = await ProductBookingModel.deleteMany(
       {
         _id: {
-          $in: deleteTargets.map((t) => t._id),
-        },
+          $in: deleteTargets.map((t) => t._id)
+        }
       },
       {
-        session,
+        session
       }
-    );
-    this.latestDestroy = time;
-    console.log(result);
-    return deleteTargets;
+    )
+    this.latestDestroy = time
+    console.log(result)
+    return deleteTargets
   }
 }
 
 export const ProductAutomatorBookingModel = getDiscriminatorModelForClass(
   ProductAutomatorModel,
   ProductAutomatorBooking
-);
+)

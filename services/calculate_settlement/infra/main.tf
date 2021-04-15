@@ -19,7 +19,7 @@ resource "aws_lambda_function" "lambda" {
 }
 
 resource "aws_cloudwatch_event_rule" "every_3min" {
-  name                = "everyday"
+  name                = "every3min"
   description         = "Fires every 0am"
   schedule_expression = "cron(0/3 * * * ? *)"
 }
