@@ -8,6 +8,7 @@ import { ArrayMinSize } from "class-validator";
 import { pullAllWith } from "lodash";
 import { ObjectId } from "mongodb";
 import { ClientSession } from "mongoose";
+import { DayOfWeekToInt } from "../../enums";
 import { DayOfWeek, ONE_HOUR, TimeMillies } from "../../utils/dateUtils";
 import { TimeRange } from "../commonTypes/DateRange.type";
 import { Tag } from "../commonTypes/Tag.type";
@@ -102,20 +103,36 @@ export class ProductAutomatorBooking extends AbsProductAutomator<ProductBooking>
     const basedDate = new Date(time + ONE_HOUR * this.timezone.offset);
     const productBookings: ProductBooking[] = [];
 
+    
     for (let index = 0; index < this.countDate; index++) {
-      productBookings.push(
-        ...this.templates.map((tpl) =>
+      let bookings = this.templates.map((tpl) =>
           tpl.generate({
-            automatorId: this._id,
-            basedDate,
-            index,
-            ownerId: this.ownerId,
-            targetItemId: this.targetItemId,
-            tags: this.tags,
+              automatorId: this._id,
+              basedDate,
+              index,
+              ownerId: this.ownerId,
+              targetItemId: this.targetItemId,
+              storeId: this._storeId,
+              tags: this.tags,
           })
-        )
       );
-    }
+
+      bookings = bookings.filter((booking) => {
+          if (!booking.dateRangeForUse?.from) return false;
+          const date = booking.dateRangeForUse.from;
+
+          if (
+              this.exceptedDayOfWeeks.some(
+                  (exceptDay) =>
+                      DayOfWeekToInt[exceptDay] ===
+                      new Date(date).getDay()
+              )
+          ) {
+              return false;
+          }
+          return true;
+      });
+
 
     const products = pullAllWith(
       productBookings,
