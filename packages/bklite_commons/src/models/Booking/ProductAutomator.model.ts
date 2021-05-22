@@ -6,7 +6,9 @@ import {
 } from '@typegoose/typegoose'
 import { ArrayMinSize } from 'class-validator'
 import { pullAllWith } from 'lodash'
-import { ObjectId, ClientSession } from 'mongodb'
+import { ObjectId } from 'mongodb'
+import { ClientSession } from 'mongoose'
+import { DayOfWeekToInt } from '../../enums'
 import { DayOfWeek, ONE_HOUR, TimeMillies } from '../../utils/dateUtils'
 import { TimeRange } from '../commonTypes/DateRange.type'
 import { Tag } from '../commonTypes/Tag.type'
@@ -107,20 +109,39 @@ export class ProductAutomatorBooking extends AbsProductAutomator<ProductBooking>
     const productBookings: ProductBooking[] = []
 
     for (let index = 0; index < this.countDate; index++) {
-      productBookings.push(
-        ...this.templates.map((tpl) => {
-          const temp = tpl.generate({
-            automatorId: this._id,
-            basedDate,
-            index,
-            ownerId: this.ownerId,
-            targetItemId: this.targetItemId,
-            tags: this.tags
-          })
-          temp.usageDetails = temp.capacityDetails.map(capacityToUsageDetails)
-          return temp
+      let bookings = this.templates.map((tpl) => {
+        const temp = tpl.generate({
+          automatorId: this._id,
+          basedDate,
+          index,
+          ownerId: this.ownerId,
+          targetItemId: this.targetItemId,
+          tags: this.tags
         })
+
+        temp.usageDetails = temp.capacityDetails.map(capacityToUsageDetails)
+        return temp
+      }
       )
+
+      bookings = bookings.filter((booking) => {
+        const dateRangeForUse = booking.dateRangeForUse
+        if (dateRangeForUse?.from == null) {
+          return false
+        }
+        const date = dateRangeForUse.from
+
+        if (
+          this.exceptedDayOfWeeks.some(
+            (exceptDay) =>
+              DayOfWeekToInt[exceptDay] ===
+              new Date(date).getDay()
+          )
+        ) {
+          return false
+        }
+        return true
+      })
     }
 
     // 이미 생성되어있는 Product와 비교하여 중복 제거

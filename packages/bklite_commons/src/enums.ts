@@ -1,3 +1,5 @@
+import { DayOfWeek } from './utils/dateUtils'
+
 export enum ServiceUsageType {
   USER = 'USER',
   STORE = 'STORE',
@@ -16,6 +18,16 @@ export enum ServiceUsageType {
   FILE = 'FILE',
   USER_BUSINESS = 'USER_BUSINESS',
   USER_CUSTOMER = 'USER_CUSTOMER',
+}
+
+export const DayOfWeekToInt: Record<DayOfWeek, number> = {
+  1: 0,
+  2: 1,
+  4: 2,
+  8: 3,
+  16: 4,
+  32: 5,
+  64: 6
 }
 
 export enum Action {
