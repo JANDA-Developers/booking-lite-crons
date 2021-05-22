@@ -27,3 +27,27 @@ variable "env_db_uri" {
   type        = string
   description = "Lambda DB URI"
 }
+
+variable "env_prod" {
+  description = "This is the environment where your webapp is deployed. qa, prod, or dev"
+}
+
+variable "env_dev" {
+  description = "This is the environment where your webapp is deployed. qa, prod, or dev"
+}
+
+variable "vpc_id_dev" {
+
+}
+
+variable "subnet_ids_dev" {
+
+}
+
+variable "layer_file_name_dev" {
+
+}
+
+variable "env_db_uri_dev" {
+
+}
