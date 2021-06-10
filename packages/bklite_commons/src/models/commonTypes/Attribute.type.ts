@@ -44,3 +44,4 @@ export class AttributeParam {
   @Prop({ required: true })
   value!: string
 }
+

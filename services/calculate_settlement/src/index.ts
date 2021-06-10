@@ -56,6 +56,7 @@ ResponseType<Array<DocumentType<ProductBooking>>>
     }).group({
       _id: '$_providerId',
       amount: {
+        //이거 로직이 맞음? ??? refund 떄문에 안맞는거 같은데? 
         $sum: '$pricePaymentCompleted'
       }
     }).session(session ?? null)

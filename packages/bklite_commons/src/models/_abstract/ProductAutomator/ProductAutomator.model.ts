@@ -118,7 +118,7 @@ export abstract class AbsProductAutomator<T extends Product>
 }
 
 @Pre("save", async function (this: DocumentType<ProductAutomator>, next) {
-  if (this.__v == null) {
+  if (this.isNew) {
     const session = this.$session();
     this.serviceCustomerId = this.ownerId;
     if (!this.serviceProviderName) {

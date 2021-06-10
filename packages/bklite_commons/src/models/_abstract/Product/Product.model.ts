@@ -43,7 +43,7 @@ export const serviceUsageChargingForProduct = async (
 };
 
 @Pre("save", async function (this: DocumentType<Product>, next: any) {
-  if (this.__v == null) {
+  if (this.isNew) {
     serviceUsageChargingForProduct(this);
   }
   next();
