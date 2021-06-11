@@ -30,6 +30,7 @@ export interface ITemplateGenerateParams {
   index: number;
   targetItemId: ObjectId;
   ownerId: ObjectId;
+  _storeId: ObjectId;
   tags?: Tag[];
 }
 
@@ -51,6 +52,7 @@ export class ProductBookingTemplate extends ProductTemplate<ITemplateGeneratePar
       ownerId,
       targetItemId,
       tags,
+      _storeId,
     } = input;
     const automatorInfo = new ProductBookingAutomatorInfo({
       automatorId,
@@ -76,6 +78,7 @@ export class ProductBookingTemplate extends ProductTemplate<ITemplateGeneratePar
       capacityDetails: this.capacityDetails,
       _itemId: targetItemId,
       automatorInfo,
+      _storeId,
       _ownerId: ownerId,
       tags: tags || [],
     } as ProductBooking);
@@ -97,6 +100,10 @@ export class ProductAutomatorBooking extends AbsProductAutomator<ProductBooking>
   @Prop({ enum: DayOfWeek, default: [], type: mongoose.SchemaTypes.Number })
   exceptedDayOfWeeks: DayOfWeek[] = [];
 
+  @Prop({ default: new ObjectId() })
+  _storeId!: ObjectId;
+
+
   async planGenerate(
     time: TimeMillies = Date.now()
   ): Promise<ProductBooking[]> {
@@ -112,7 +119,7 @@ export class ProductAutomatorBooking extends AbsProductAutomator<ProductBooking>
               index,
               ownerId: this.ownerId,
               targetItemId: this.targetItemId,
-              storeId: this._storeId,
+              _storeId: this._storeId,
               tags: this.tags,
           })
       );
@@ -132,6 +139,7 @@ export class ProductAutomatorBooking extends AbsProductAutomator<ProductBooking>
           }
           return true;
       });
+    }
 
 
     const products = pullAllWith(
@@ -155,7 +163,6 @@ export class ProductAutomatorBooking extends AbsProductAutomator<ProductBooking>
     );
     return products;
   }
-
   async planDestroy(
     time: TimeMillies = Date.now()
   ): Promise<DocumentType<ProductBooking>[]> {

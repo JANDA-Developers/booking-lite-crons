@@ -36,6 +36,9 @@ export const handler = async (): Promise<
   };
 };
 
+
+
+
 export const findAutomators = async (session?: ClientSession) =>
   ProductAutomatorBookingModel.find({
     isDeleted: { $ne: true },

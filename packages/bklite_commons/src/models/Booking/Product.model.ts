@@ -115,6 +115,9 @@ export class ProductBooking extends Product implements IAutomatable {
 
   @Prop()
   capacityPick?: number;
+ 
+  @Prop()
+  _storeId!: ObjectId;
 
   @Prop({ type: () => [Capacity] })
   capacityDetails: Capacity[] = [];

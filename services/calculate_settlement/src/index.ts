@@ -10,7 +10,7 @@ import {
 import {
   ProductBooking,
   PurchaseModel,
-  SettlementMallModel
+  SettlementMallModel,
 } from '@janda/bklite_models'
 import { Status } from '../../../packages/bklite_commons/dist/enums'
 
@@ -50,13 +50,30 @@ ResponseType<Array<DocumentType<ProductBooking>>>
     }, {
       session
     })
+    
+    await PurchaseModel.updateMany({
+      _isCalculatedToSettlement: {
+        $ne: true
+      },
+      paymentStatus: Status.COMPLETED,
+      status: {
+        $ne: Status.CANCELED
+      }
+    },
+    {
+      $set: {
+        _calculationForSettlementId: calculationId
+      }
+    }, {
+      session
+    })
 
     const list = await PurchaseModel.aggregate<PaymentInfo>().match({
       _calculationForSettlementId: calculationId
     }).group({
       _id: '$_providerId',
       amount: {
-        //이거 로직이 맞음? ??? refund 떄문에 안맞는거 같은데? 
+        //의문 1 이거 로직이 맞음? ??? refund 떄문에 안맞는거 같은데? 
         $sum: '$pricePaymentCompleted'
       }
     }).session(session ?? null)
@@ -76,6 +93,10 @@ ResponseType<Array<DocumentType<ProductBooking>>>
     })), {
       session
     })
+
+    // TODO !!! 이거 purchase 가 아니라 
+    // purchaseBundle을 사용해서 업데이트 시켜줘야함.
+    // 같은 로직으로 그대로 옴기면 될듯 ?
 
     list.forEach(item => {
       console.log(`${item._id.toHexString()} => ${item.amount} increased`)

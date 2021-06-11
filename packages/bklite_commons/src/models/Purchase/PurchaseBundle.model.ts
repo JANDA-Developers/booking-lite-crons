@@ -69,6 +69,9 @@ export class PurchaseBundle {
   @Prop()
   sellerMemo?: string
 
+  @Prop({default: false})
+  _isCalculatedToSettlement?: boolean // settlement.amount에 반영이 되었는가?
+
   @Prop({ type: () => ObjectId })
   _storeId!: ObjectId
 

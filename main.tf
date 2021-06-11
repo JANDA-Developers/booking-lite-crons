@@ -71,3 +71,5 @@ module "calculate_settlement" {
   env_db_uri            = var.env_db_uri
   lambda_iam_arn = aws_iam_role.iam_for_lambda.arn
 }
+
+
