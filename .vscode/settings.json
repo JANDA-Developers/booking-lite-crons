@@ -1,4 +1,5 @@
 {
     "editor.tabSize": 2,
-    "standard.engine": "ts-standard"
+    "standard.engine": "ts-standard",
+    "standard.autoFixOnSave": true
 }

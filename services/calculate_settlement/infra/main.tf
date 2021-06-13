@@ -11,6 +11,8 @@ resource "aws_lambda_function" "lambda" {
 
   source_code_hash = filebase64sha256("${path.module}/dist.zip")
 
+  description = "[BKLITE-CRON-${var.environment}] - 정산 금액 계산 Cron"
+
   environment {
     variables = {
       DB_URI = var.env_db_uri
@@ -19,8 +21,8 @@ resource "aws_lambda_function" "lambda" {
 }
 
 resource "aws_cloudwatch_event_rule" "every_3min" {
-  name                = "everyday"
-  description         = "Fires every 0am"
+  name                = "every3min"
+  description         = "Fires every 3min"
   schedule_expression = "cron(0/3 * * * ? *)"
 }
 

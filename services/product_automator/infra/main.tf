@@ -9,6 +9,8 @@ resource "aws_lambda_function" "lambda" {
 
   layers = var.lambda_layer_arn_list
 
+  description = "[BKLITE-CRON-${var.environment}] - ProductAutomator를 통한 Product 생성 Cron"
+
   source_code_hash = filebase64sha256("${path.module}/dist.zip")
 
   environment {

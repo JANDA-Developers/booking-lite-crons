@@ -3,115 +3,115 @@ import {
   getDiscriminatorModelForClass,
   Index,
   Pre,
-  Prop,
-} from "@typegoose/typegoose";
-import { ObjectId } from "mongodb";
-import { Currency, ProductType } from "../../enums";
-import { ONE_DAY } from "../../utils/dateUtils";
-import { DateRange, TimeRange } from "../commonTypes/DateRange.type";
-import { Product, ProductModel } from "../_abstract/Product/Product.model";
+  Prop
+} from '@typegoose/typegoose'
+import { ObjectId } from 'mongodb'
+import { Currency, ProductType } from '../../enums'
+import { ONE_DAY } from '../../utils/dateUtils'
+import { DateRange, TimeRange } from '../commonTypes/DateRange.type'
+import { Product, ProductModel } from '../_abstract/Product/Product.model'
 import {
   IAutomatable,
-  IAutomatorInfo,
-} from "../_abstract/ProductAutomator/IAutomator.interface";
+  IAutomatorInfo
+} from '../_abstract/ProductAutomator/IAutomator.interface'
 import {
   Capacity,
   CapacitySummary,
-  capacityToUsageDetails,
-} from "./Capacity.type";
+  capacityToUsageDetails
+} from './Capacity.type'
 
 export class ProductBookingAutomatorInfo implements IAutomatorInfo {
-  constructor(input: {
-    automatorId: ObjectId;
-    basedDate: Date;
-    index: number;
-    timeRangeForUse: TimeRange;
-    timeRangeForSale?: TimeRange;
+  constructor (input: {
+    automatorId: ObjectId
+    basedDate: Date
+    index: number
+    timeRangeForUse: TimeRange
+    timeRangeForSale?: TimeRange
   }) {
     for (const key in input) {
       if (Object.prototype.hasOwnProperty.call(input, key)) {
-        const element = input[key];
-        this[key] = element;
+        const element = input[key]
+        this[key] = element
       }
     }
-    const basedDateTime = input.basedDate.getTime();
-    this.basedDate = new Date(basedDateTime - (basedDateTime % ONE_DAY));
+    const basedDateTime = input.basedDate.getTime()
+    this.basedDate = new Date(basedDateTime - (basedDateTime % ONE_DAY))
     this.calculatedDate = new Date(
       this.basedDate.getTime() + ONE_DAY * input.index
-    );
-    this.hashCode = this.toHashCode();
+    )
+    this.hashCode = this.toHashCode()
   }
 
   @Prop({ type: () => ObjectId, required: true })
-  automatorId!: ObjectId;
+  automatorId!: ObjectId
 
   @Prop({ required: true })
-  index!: number;
+  index!: number
 
   @Prop({ required: true })
-  basedDate!: Date;
+  basedDate!: Date
 
   @Prop({
-    default(this: ProductBookingAutomatorInfo) {
-      return new Date(this.basedDate.getTime() + ONE_DAY * this.index);
-    },
+    default (this: ProductBookingAutomatorInfo) {
+      return new Date(this.basedDate.getTime() + ONE_DAY * this.index)
+    }
   })
-  calculatedDate!: Date;
+  calculatedDate!: Date
 
   @Prop({ type: () => TimeRange, required: true })
-  timeRangeForUse!: TimeRange;
+  timeRangeForUse!: TimeRange
 
   @Prop({ type: () => TimeRange })
-  timeRangeForSale?: TimeRange;
+  timeRangeForSale?: TimeRange
 
   @Prop({
-    default(this: ProductBookingAutomatorInfo) {
-      return this.toHashCode();
-    },
+    default (this: ProductBookingAutomatorInfo) {
+      return this.toHashCode()
+    }
   })
-  hashCode!: string;
+  hashCode!: string
 
-  toHashCode() {
-    return `${this.automatorId.toHexString()}_${this.calculatedDate.getTime()}_${this.timeRangeForUse.toString()}`;
+  toHashCode (): string {
+    return `${this.automatorId.toHexString()}_${this.calculatedDate.getTime()}_${this.timeRangeForUse.toString()}`
   }
 }
 
 @Index(
   {
-    "automatorInfo.hashCode": true,
+    'automatorInfo.hashCode': true
   },
   {
     unique: true,
-    sparse: true,
+    sparse: true
   }
 )
-@Pre("save", async function (this: DocumentType<ProductBooking>, next) {
-  const capacity = this.capacityDetails;
-  this.usageDetails = capacity.map(capacityToUsageDetails);
-  next();
+@Pre('save', async function (this: DocumentType<ProductBooking>, next) {
+  const capacity = this.capacityDetails
+  this.usageDetails = capacity.map(capacityToUsageDetails)
+  await next()
 })
 export class ProductBooking extends Product implements IAutomatable {
-  get typeSet() {
-    return ProductType.BOOKING;
+  get typeSet (): ProductType {
+    return ProductType.BOOKING
   }
 
   @Prop()
-  disabled?: boolean;
+  disabled?: boolean
 
   @Prop({ type: () => DateRange })
-  dateRangeForSale?: DateRange;
+  dateRangeForSale?: DateRange
 
   @Prop({ type: () => DateRange, _id: false })
-  dateRangeForUse?: DateRange;
+  dateRangeForUse?: DateRange
 
   @Prop({ required: true, default: Currency.KRW })
-  currency: Currency = Currency.KRW;
+  currency: Currency = Currency.KRW
 
   @Prop({ required: true })
-  price!: number;
+  price!: number
 
   @Prop({ required: true })
-  capacity!: number;
+  capacity!: number
 
   @Prop()
   capacityPick?: number;
@@ -120,31 +120,31 @@ export class ProductBooking extends Product implements IAutomatable {
   _storeId!: ObjectId;
 
   @Prop({ type: () => [Capacity] })
-  capacityDetails: Capacity[] = [];
+  capacityDetails: Capacity[] = []
 
   @Prop({
     type: () => [CapacitySummary],
     _id: false,
-    default(this: DocumentType<ProductBooking>) {
-      return this.capacityDetails.map(capacityToUsageDetails);
-    },
+    default (this: DocumentType<ProductBooking>) {
+      return this.capacityDetails.map(capacityToUsageDetails)
+    }
   })
-  usageDetails!: CapacitySummary[];
+  usageDetails!: CapacitySummary[]
 
   // automator로부터 받은 정보. unique 값을 판별하기 위함임.
   @Prop({
     type: () => ProductBookingAutomatorInfo,
     required: false,
-    _id: false,
+    _id: false
   })
-  automatorInfo?: ProductBookingAutomatorInfo;
+  automatorInfo?: ProductBookingAutomatorInfo
 
-  isAutogenerated() {
-    return !!this.automatorInfo;
+  isAutogenerated (): boolean {
+    return !(this.automatorInfo == null)
   }
 }
 
 export const ProductBookingModel = getDiscriminatorModelForClass(
   ProductModel,
   ProductBooking
-);
+)

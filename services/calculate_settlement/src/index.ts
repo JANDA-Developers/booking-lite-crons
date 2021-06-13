@@ -86,7 +86,7 @@ ResponseType<Array<DocumentType<ProductBooking>>>
         },
         update: {
           $inc: {
-            currentAmount: item.amount
+            amount: item.amount
           }
         }
       }
