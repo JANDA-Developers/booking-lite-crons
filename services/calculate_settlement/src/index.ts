@@ -9,11 +9,14 @@ import {
 
 import {
   ProductBooking,
-  PurchaseModel,
+  PurchaseBundleModel,
   SettlementMallModel,
 } from '@janda/bklite_models'
-import { Status } from '../../../packages/bklite_commons/dist/enums'
+import { Paymethod, Status } from '../../../packages/bklite_commons/dist/enums'
 
+
+// 트랜스퍼 취소 로직에서 이미 mall에 amount를 제하는 로직이 있다.
+// 여기서는 calculated되지 않은 금액을 다 더해주면된다.
 export const handler = async (): Promise<
 ResponseType<Array<DocumentType<ProductBooking>>>
 > => {
@@ -31,17 +34,15 @@ ResponseType<Array<DocumentType<ProductBooking>>>
     const time = new Date()
 
     console.log('Exec ID =', calculationId.toHexString())
-
     console.log('exec date =', time.toISOString())
 
-    await PurchaseModel.updateMany({
+
+    //purchaseBundle Set
+    await PurchaseBundleModel.updateMany({
       _isCalculatedToSettlement: {
         $ne: true
       },
       paymentStatus: Status.COMPLETED,
-      status: {
-        $ne: Status.CANCELED
-      }
     },
     {
       $set: {
@@ -51,14 +52,13 @@ ResponseType<Array<DocumentType<ProductBooking>>>
       session
     })
     
-    await PurchaseModel.updateMany({
+    //purchase Set
+    await PurchaseBundleModel.updateMany({
       _isCalculatedToSettlement: {
         $ne: true
       },
+      paymethod: Paymethod.CARD,
       paymentStatus: Status.COMPLETED,
-      status: {
-        $ne: Status.CANCELED
-      }
     },
     {
       $set: {
@@ -68,12 +68,11 @@ ResponseType<Array<DocumentType<ProductBooking>>>
       session
     })
 
-    const list = await PurchaseModel.aggregate<PaymentInfo>().match({
+    const list = await PurchaseBundleModel.aggregate<PaymentInfo>().match({
       _calculationForSettlementId: calculationId
     }).group({
       _id: '$_providerId',
       amount: {
-        //의문 1 이거 로직이 맞음? ??? refund 떄문에 안맞는거 같은데? 
         $sum: '$pricePaymentCompleted'
       }
     }).session(session ?? null)
