@@ -2,6 +2,7 @@ import { Prop } from '@typegoose/typegoose'
 
 export class NicepayPayResult {
   @Prop()
+    //https://developers.nicepay.co.kr/manual-code.php
   ResultCode!: '3001' | '4000' | '4100' | 'A000' | '7001'
 
   @Prop()
