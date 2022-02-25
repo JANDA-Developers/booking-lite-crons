@@ -114,9 +114,16 @@ export enum Status {
  CANCELED = "CANCELED",
 }
 export enum Paymethod {
+ NON_PAY = "NON_PAY",
  CASH = "CASH",
  CARD = "CARD",
  BANK_TRANSFER = "BANK_TRANSFER",
+ PAY_PAL = "PAY_PAL",
+ KAKAO = "KAKAO",
+ NAVER = "NAVER",
+ SAMSUNG = "SAMSUNG",
+ VBANK = "VBANK",
+ OFFLINE = "OFFLINE",
 }
 
 interface PaymentInfo {
@@ -146,7 +153,13 @@ export const markCaculateTarget = async (calculationId: any, session: any) =>
     $ne: true,
    },
    paymethod: {
-    $nin: [Paymethod.CASH, Paymethod.BANK_TRANSFER],
+    $in: [
+     Paymethod.NAVER,
+     Paymethod.KAKAO,
+     Paymethod.SAMSUNG,
+     Paymethod.VBANK,
+     Paymethod.CARD,
+    ],
    },
    paymentStatus: {
     $ne: Status.PENDING,
